@@ -1,0 +1,11 @@
+{
+  "lambda": {
+    "role": "ece6051-health-management-system-executor",
+    "name": "ece6051-health-management-system",
+    "region": "us-east-1"
+  },
+  "api": {
+    "id": "j4mbz2k3ad",
+    "module": "index"
+  }
+}

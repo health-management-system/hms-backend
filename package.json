@@ -1,0 +1,26 @@
+{
+  "name": "ece6051-health-management-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amazon-cognito-identity-js": "^6.1.2",
+    "aws-sdk": "^2.1308.0",
+    "claudia-api-builder": "^4.1.2",
+    "har-validator": "^5.1.5",
+    "isomorphic-fetch": "^3.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "jwk-to-pem": "^2.0.5",
+    "material-ui": "^0.20.2",
+    "node-fetch": "^3.3.0",
+    "querystring": "^0.2.1",
+    "request": "^2.88.2",
+    "uuid": "^7.0.3"
+  }
+}
