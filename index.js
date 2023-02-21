@@ -1,5 +1,3 @@
-const queryString = require("querystring");
-
 const { v4: uuidv4 } = require("uuid");
 const { URLSearchParams } = require("url");
 const ApiBuilder = require("claudia-api-builder"),
@@ -119,11 +117,7 @@ api.get(routes.getAllUsers(), (request) => {
 
 api.get(routes.findUser(), (request) => {
   // GET a user by username
-  const queryStringParameters = queryString.parse(
-    request.event.queryStringParameters
-  );
-
-  const username = queryStringParameters.username;
+  const username = request.queryString && request.queryString.username;
 
   if (!username) {
     return { error: "Username parameter is missing." };
