@@ -10,7 +10,8 @@ const Routing = require('./routing/routing');
 const databaseTable = new Routing.DynamoDBTables();
 const routes = new Routing.ServerEndpoints();
 
-api.post(routes.createUser(),(request) => { // SAVE user -> endpoint  => /users
+// SAVE user -> endpoint  => /createuser
+api.post(routes.createUser(),(request) => { 
   // This will be replaced by Cognito USERNAME 
   var params = {
     TableName: databaseTable.getUsersTableName(), //table name -> users
@@ -28,14 +29,37 @@ api.post(routes.createUser(),(request) => { // SAVE user -> endpoint  => /users
   return dynamoDB.put(params).promise(); // returns dynamo result 
 }, { success: 201 }); // returns HTTP status 201 - Created if successful
 
-// Register doctor info
+// Register doctor info - /registerdoctorinfo
 api.post(routes.registerDoctorInfo(), (request)=> {
   var params = {
-    TableName : "tableName",
+    TableName : databaseTable.getDoctorInfoTableName(),
     Item : {
-      // To be completed
-      userid: request.body.userid
+      doctorid: request.body.doctorid,
+      firstname: request.body.firstname,
+      lastname: request.body.lastname,
+      dateofbirth: request.body.dateofbirth,
+      staffID: request.body.staffID,
+      specialization: request.body.specialization,
+      email: request.body.email,
+      phonenumber: request.body.phonenumber
      
+    }
+  }
+  return dynamoDB.put(params).promise();
+}, { success: 201 });
+
+// Register Record - /registerrecord
+api.post(routes.registerRecord(), (request)=> {
+  var userId = uuidv4()
+  var params = {
+    TableName : databaseTable.getRecordTableName(),
+    Item : {
+      recordid: userId,
+      patientUsername: request.body.patientUsername,
+      doctorUsername: request.body.doctorUsername,
+      date: request.body.date,
+      log: request.body.log,
+      subject: request.body.subject     
     }
   }
   return dynamoDB.put(params).promise();

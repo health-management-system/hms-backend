@@ -4,18 +4,16 @@ const getAllUsers = '/fetchusers'
 const findUser = '/finduser'
 const bulkCreateUsers = '/bulkcreateusers'
 
+// Doctor Info Registration 
 const registerdoctorinfo = '/registerdoctorinfo'
 
-
-// Server endpoint user management 
-const signupUser = '/signup'
-const loginUser = '/login'
-const userProfile = '/profile'
-const forgotPassword = '/forgotPassword'
-
+// Record Registeration
+const registerRecord = "/registerrecord"
 
 // DynamoDB table names
 const dynamoDBUsersTable = "users"
+const dynamoDBDoctorInfoTable = "doctor-info"
+const dynamoDBRecord = "record"
 
 
 
@@ -33,6 +31,9 @@ class ServerEndpoints {
     // Register doctor info
     registerDoctorInfo() { return registerdoctorinfo;}
 
+    // Register a record
+    registerRecord() { return registerRecord; }
+
     // User management endpoints
     signupUser() { return signupUser;}
     loginUser() { return loginUser;}
@@ -43,6 +44,8 @@ class ServerEndpoints {
 
 class DynamoDBTables {
     getUsersTableName() { return dynamoDBUsersTable;}
+    getDoctorInfoTableName() { return dynamoDBDoctorInfoTable; }
+    getRecordTableName() { return dynamoDBRecord;}
 }
 
 module.exports = { ServerEndpoints: ServerEndpoints, DynamoDBTables: DynamoDBTables};
