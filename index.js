@@ -8,7 +8,7 @@ const Routing = require("./routing/routing");
 const databaseTable = new Routing.DynamoDBTables();
 const routes = new Routing.ServerEndpoints();
 
-// SAVE user -> endpoint  => /createuser  PATIENT
+// SAVE PATIENT -> endpoint  => /registerpatientinfo  
 api.post(
   routes.registerPatientInfo(),
   (request) => {
@@ -45,7 +45,7 @@ api.post(
         staffID: request.body.staffID,
         specialization: request.body.specialization,
         email: request.body.email,
-        phonenumber: request.body.phonenumber,
+        phonenumber: request.body.phonenumber
       },
     };
     return dynamoDB.put(params).promise();
@@ -74,6 +74,7 @@ api.post(
   { success: 201 }
 );
 
+// Return list of all the patients 
 api.get(routes.getPatientsInfo(), (request) => {
   // GET all users
   return dynamoDB
@@ -82,10 +83,13 @@ api.get(routes.getPatientsInfo(), (request) => {
     .then((response) => response.Items);
 });
 
+// Return a patient information by username 
+// PAGINATION NEEDS TO BE DONE HERE
 api.get(routes.findPatient(), (request) => {
   // GET a user by username
   const username = request.queryString && request.queryString.username;
 
+  // Error Handling : If the username is emptry it will return with a 400 
   if (!username) {
     return { error: 400 };
   }
@@ -103,10 +107,12 @@ api.get(routes.findPatient(), (request) => {
     .catch((error) => ({ error: error.message }));
 });
 
+// Return a doctor information by username
 api.get(routes.findDoctor(), (request) => {
   // GET a user by username
   const username = request.queryString && request.queryString.username;
 
+  // Error Handling : If the username is emptry it will return with a 400 
   if (!username) {
     return { error: 400 };
   }
@@ -114,9 +120,9 @@ api.get(routes.findDoctor(), (request) => {
   return dynamoDB
     .query({
       TableName: databaseTable.getDoctorInfoTableName(),
-      KeyConditionExpression: "userid = :userid",
+      KeyConditionExpression: "doctorid = :doctorid",
       ExpressionAttributeValues: {
-        ":userid": username,
+        ":doctorid": username,
       },
     })
     .promise()
@@ -124,6 +130,42 @@ api.get(routes.findDoctor(), (request) => {
     .catch((error) => ({ error: error.message }));
 });
 
+
+
+/// DELETE THIS LATER
+
+/**
+ * {
+	"patientInfo": {
+		"username": "john smith",
+		"firstName": "John",
+		"lastName": "Smith",
+		"dateOfBirth": "08-24-1990",
+		"email": "sam@smith.com",
+		"phoneNumber": "5182737523",
+		"address": "123 Main St",
+		"postalCode": "A2A 2A2",
+		"healthCardNumber": "123124124142"
+	},
+	"records": {
+		"records": [{
+			"dateTime": "12the February, 2023 08:00 am",
+			"doctorName": " Mr.Michale Simon",
+			"clinic": "Happy Clinic",
+			"subject": " Severe Migraine"
+		}]
+	},
+  "pagination": {
+        "total_items": 200,
+        "items_per_page": 10,
+        "current_page": 1
+    }
+}
+ */
+
+
+
+/// DELETE THIS LATER 
 // api.get("/patientI", (request) => { // GET all data
 //   const getUsers = dynamoDB.scan({ TableName: databaseTable.getPatientsInfoTableName() }).promise();
 //   const getOrders = dynamoDB.query({
