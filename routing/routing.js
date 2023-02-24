@@ -16,7 +16,11 @@ const dynamoDBPatientInfoTable = "users"
 const dynamoDBDoctorInfoTable = "doctor-info"
 const dynamoDBRecord = "record"
 
+// TEST 
 
+const findPatientPagination = '/findpatientPagination'
+
+//
 
 class ServerEndpoints {
 
@@ -26,6 +30,8 @@ class ServerEndpoints {
     getPatientsInfo() { return getPatientsInfo;}
     // Find a specific Patient
     findPatient() { return findPatient;}
+    // Find a speciic Patient with Pagination 
+    findPatientPagination() { return findPatientPagination; }
     // Find a specific Doctor
     findDoctor() { return findDoctor; }
     // Create Multiple Users at once

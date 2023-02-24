@@ -43,6 +43,7 @@ api.post(
         lastname: request.body.lastname,
         dateofbirth: request.body.dateofbirth,
         staffID: request.body.staffID,
+        clinic: request.body.clinic,
         specialization: request.body.specialization,
         email: request.body.email,
         phonenumber: request.body.phonenumber
@@ -83,29 +84,114 @@ api.get(routes.getPatientsInfo(), (request) => {
     .then((response) => response.Items);
 });
 
-// Return a patient information by username 
-// PAGINATION NEEDS TO BE DONE HERE
-api.get(routes.findPatient(), (request) => {
-  // GET a user by username
+// Return a patient information by username - Pagination
+api.get(routes.findPatient(), async (request) => {
   const username = request.queryString && request.queryString.username;
 
-  // Error Handling : If the username is emptry it will return with a 400 
   if (!username) {
     return { error: 400 };
   }
 
-  return dynamoDB
-    .query({
-      TableName: databaseTable.getPatientsInfoTableName(),
-      KeyConditionExpression: "userid = :userid",
-      ExpressionAttributeValues: {
-        ":userid": username,
-      },
-    })
-    .promise()
-    .then((response) => response.Items[0])
-    .catch((error) => ({ error: error.message }));
+  const pageSize = parseInt(request.queryString.pageSize) || 10;
+  const currentPage = parseInt(request.queryString.page) || 1;
+
+  const offset = (currentPage - 1) * pageSize;
+
+  const [patientInfo, recordsCount, records] = await Promise.all([
+    // Get patient info by username
+    dynamoDB
+      .query({
+        TableName: databaseTable.getPatientsInfoTableName(),
+        KeyConditionExpression: "userid = :userid",
+        ExpressionAttributeValues: {
+          ":userid": username,
+        },
+      })
+      .promise()
+      .then((response) => response.Items[0]),
+    // Get the count of patient records by username
+    dynamoDB
+      .query({
+        TableName: databaseTable.getRecordTableName(),
+        IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
+        KeyConditionExpression: "patientUsername = :username",
+        ExpressionAttributeValues: {
+          ":username": username,
+        },
+        Select: "COUNT",
+      })
+      .promise()
+      .then((response) => response.Count),
+    // Get patient records by username with pagination
+    dynamoDB
+      .query({
+        TableName: databaseTable.getRecordTableName(),
+        IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
+        KeyConditionExpression: "patientUsername = :username",
+        ExpressionAttributeValues: {
+          ":username": username,
+        },
+        Limit: pageSize,
+        ScanIndexForward: false,
+        ExclusiveStartKey:
+          currentPage > 1 ? request.state.records.lastEvaluatedKey : undefined,
+      })
+      .promise()
+      .then((response) => response.Items),
+  ]);
+
+  // return { patientInfoOBJECT : patientInfo, recordObject : records, recordsCountObject: recordsCount }
+  // Extract the set of unique doctor usernames from the records
+  const uniqueDoctorUsernames = [...new Set(records.map((record) => record.doctorUsername))];
+
+  // Fetch the doctor information for each unique doctor username
+  const doctors = await Promise.all(
+    uniqueDoctorUsernames.map((doctorUsername) =>
+      dynamoDB
+        .query({
+          TableName: databaseTable.getDoctorInfoTableName(),
+          KeyConditionExpression: "doctorid = :doctorid",
+          ExpressionAttributeValues: {
+            ":doctorid": doctorUsername,
+          },
+        })
+        .promise()
+        .then((response) => response.Items[0])
+    )
+  );
+
+  // Map each record to a new object that includes the doctor information
+  const recordsWithDoctorInfo = records.map((record) => {
+    const doctor = doctors.find((d) => d.doctorid === record.doctorUsername);
+    return {
+      dateTime: record.dateTime,
+      doctorName: `${doctor.firstname} ${doctor.lastname}`,
+      clinic: doctor.clinic,
+      subject: record.subject,
+    };
+  });
+
+  return {
+    patientInfo: {
+      username: patientInfo.userid,
+      firstname: patientInfo.firstname,
+      lastname: patientInfo.lastname,
+      dateofbirth: patientInfo.dateofbirth,
+      email: patientInfo.email,
+      phonenumber: patientInfo.phonenumber,
+      address: patientInfo.address,
+      postalcode: patientInfo.postalcode,
+      healthcardnumber: patientInfo.healthcardnumber,
+    },
+    records: {
+      total_items: recordsCount,
+      items_per_page: pageSize,
+      current_page: currentPage,
+      records: recordsWithDoctorInfo,
+    },
+  };
 });
+
 
 // Return a doctor information by username
 api.get(routes.findDoctor(), (request) => {
@@ -129,9 +215,6 @@ api.get(routes.findDoctor(), (request) => {
     .then((response) => response.Items[0])
     .catch((error) => ({ error: error.message }));
 });
-
-
-
 /// DELETE THIS LATER
 
 /**
