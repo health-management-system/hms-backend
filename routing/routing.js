@@ -1,8 +1,9 @@
-// Server endpoint , Creating a user, creaeting multiple users
-const createUser = '/createuser'
-const getAllUsers = '/fetchusers'
-const findUser = '/finduser'
-const bulkCreateUsers = '/bulkcreateusers'
+// Server endpoint , Creating a patient, doctor, creaeting multiple patients
+const registerPatientInfo = '/registerpatientinfo'
+const getPatientsInfo = '/fetchpatientsinfo'
+const findPatient = '/findpatient'
+const findDoctor = '/finddoctor'
+const bulkRegisterPatients = '/bulkcreateusers'
 
 // Doctor Info Registration 
 const registerdoctorinfo = '/registerdoctorinfo'
@@ -11,7 +12,7 @@ const registerdoctorinfo = '/registerdoctorinfo'
 const registerRecord = "/registerrecord"
 
 // DynamoDB table names
-const dynamoDBUsersTable = "users"
+const dynamoDBPatientInfoTable = "users"
 const dynamoDBDoctorInfoTable = "doctor-info"
 const dynamoDBRecord = "record"
 
@@ -20,13 +21,15 @@ const dynamoDBRecord = "record"
 class ServerEndpoints {
 
     // Create a user
-    createUser() { return createUser;}
+    registerPatientInfo() { return registerPatientInfo;}
     // Get all the users
-    getAllUsers() { return getAllUsers;}
-    // Find a specific user
-    findUser() { return findUser;}
+    getPatientsInfo() { return getPatientsInfo;}
+    // Find a specific Patient
+    findPatient() { return findPatient;}
+    // Find a specific Doctor
+    findDoctor() { return findDoctor; }
     // Create Multiple Users at once
-    addMultipleUsersToDatabase() { return bulkCreateUsers;}
+    addMultiplePatientsToDatabase() { return bulkRegisterPatients;}
 
     // Register doctor info
     registerDoctorInfo() { return registerdoctorinfo;}
@@ -43,7 +46,7 @@ class ServerEndpoints {
 }
 
 class DynamoDBTables {
-    getUsersTableName() { return dynamoDBUsersTable;}
+    getPatientsInfoTableName() { return dynamoDBPatientInfoTable;}
     getDoctorInfoTableName() { return dynamoDBDoctorInfoTable; }
     getRecordTableName() { return dynamoDBRecord;}
 }

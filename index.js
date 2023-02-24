@@ -8,13 +8,13 @@ const Routing = require("./routing/routing");
 const databaseTable = new Routing.DynamoDBTables();
 const routes = new Routing.ServerEndpoints();
 
-// SAVE user -> endpoint  => /createuser
+// SAVE user -> endpoint  => /createuser  PATIENT
 api.post(
-  routes.createUser(),
+  routes.registerPatientInfo(),
   (request) => {
     // This will be replaced by Cognito USERNAME
     var params = {
-      TableName: databaseTable.getUsersTableName(), //table name -> users
+      TableName: databaseTable.getPatientsInfoTableName(), //table name -> users
       Item: {
         userid: request.body.userid,
         firstname: request.body.firstname,
@@ -31,7 +31,7 @@ api.post(
   { success: 201 }
 ); // returns HTTP status 201 - Created if successful
 
-// Register doctor info - /registerdoctorinfo
+// Register doctor info - /registerdoctorinfo DOCTOR
 api.post(
   routes.registerDoctorInfo(),
   (request) => {
@@ -53,7 +53,7 @@ api.post(
   { success: 201 }
 );
 
-// Register Record - /registerrecord
+// Register Record - /registerrecord 
 api.post(
   routes.registerRecord(),
   (request) => {
@@ -74,58 +74,46 @@ api.post(
   { success: 201 }
 );
 
-//
-
-// api.post(routes.addMultipleUsersToDatabase(), (request) => {
-//   console.log(request);
-//   var usersArray = JSON.parse(JSON.stringify(request.body));
-//   console.log(usersArray);
-//   var results = [];
-//   var user;
-//   var uuidUser;
-//   for (var i = 0; i < usersArray.length; i++) {
-//     uuidUser = uuidv4();
-//     user = usersArray[i];
-//     console.log(user);
-//     var params = {
-//       TableName: databaseTable.getUsersTableName(),
-//       Item: {
-//         userid: uuidUser,
-//         firstname: user.firstname,
-//         lastname: user.lastname,
-//         gender: user.gender,
-//         role: user.role,
-//         age: user.age,
-//         clinicname: user.clinicname
-//       }
-//     };
-//     // push results to be resolved later
-//     results.push(dynamoDB.put(params).promise());
-//   }
-//   console.log(results);
-//   // return promise that resolves when all results resolve
-//   return Promise.all(results);
-// }, { success: 201 });// returns HTTP status 201 - Created if successful
-
-api.get(routes.getAllUsers(), (request) => {
+api.get(routes.getPatientsInfo(), (request) => {
   // GET all users
   return dynamoDB
-    .scan({ TableName: databaseTable.getUsersTableName() })
+    .scan({ TableName: databaseTable.getPatientsInfoTableName() })
     .promise()
     .then((response) => response.Items);
 });
 
-api.get(routes.findUser(), (request) => {
+api.get(routes.findPatient(), (request) => {
   // GET a user by username
   const username = request.queryString && request.queryString.username;
 
   if (!username) {
-    return { error: "Username parameter is missing." };
+    return { error: 400 };
   }
 
   return dynamoDB
     .query({
-      TableName: databaseTable.getUsersTableName(),
+      TableName: databaseTable.getPatientsInfoTableName(),
+      KeyConditionExpression: "userid = :userid",
+      ExpressionAttributeValues: {
+        ":userid": username,
+      },
+    })
+    .promise()
+    .then((response) => response.Items[0])
+    .catch((error) => ({ error: error.message }));
+});
+
+api.get(routes.findDoctor(), (request) => {
+  // GET a user by username
+  const username = request.queryString && request.queryString.username;
+
+  if (!username) {
+    return { error: 400 };
+  }
+
+  return dynamoDB
+    .query({
+      TableName: databaseTable.getDoctorInfoTableName(),
       KeyConditionExpression: "userid = :userid",
       ExpressionAttributeValues: {
         ":userid": username,
@@ -137,7 +125,7 @@ api.get(routes.findUser(), (request) => {
 });
 
 // api.get("/patientI", (request) => { // GET all data
-//   const getUsers = dynamoDB.scan({ TableName: databaseTable.getUsersTableName() }).promise();
+//   const getUsers = dynamoDB.scan({ TableName: databaseTable.getPatientsInfoTableName() }).promise();
 //   const getOrders = dynamoDB.query({
 //   TableName: databaseTable.getOrdersTableName(),
 //   KeyConditionExpression: "order_status = :status",
@@ -165,17 +153,36 @@ api.get(routes.findUser(), (request) => {
 //   return data;
 // });
 
-// Commented out for now. Once we get to this point , will be uncommented and compeleted.
-// api.get(routes.findUser(), (request) => { // GET a user by userid
-//   const userid = request.queryStringParameters.userid;
-
-//   return dynamoDB.query({
-//     TableName: databaseTable.getUsersTableName(),
-//     KeyConditionExpression: "userid = :userid",
-//     ExpressionAttributeValues: {
-//       ":userid": userid
-//         }
-//   }).promise().then(response => response.Items[0]);
-// });
+// Can be uncommented if we decided to add multiple patients at once to our Table (For sake of populating the table only)
+// api.post(routes.addMultiplePatientsToDatabase(), (request) => {
+//   console.log(request);
+//   var usersArray = JSON.parse(JSON.stringify(request.body));
+//   console.log(usersArray);
+//   var results = [];
+//   var user;
+//   var uuidUser;
+//   for (var i = 0; i < usersArray.length; i++) {
+//     uuidUser = uuidv4();
+//     user = usersArray[i];
+//     console.log(user);
+//     var params = {
+//       TableName: databaseTable.getPatientsInfoTableName(),
+//       Item: {
+//         userid: uuidUser,
+//         firstname: user.firstname,
+//         lastname: user.lastname,
+//         gender: user.gender,
+//         role: user.role,
+//         age: user.age,
+//         clinicname: user.clinicname
+//       }
+//     };
+//     // push results to be resolved later
+//     results.push(dynamoDB.put(params).promise());
+//   }
+//   console.log(results);
+//   // return promise that resolves when all results resolve
+//   return Promise.all(results);
+// }, { success: 201 });// returns HTTP status 201 - Created if successful
 
 module.exports = api;
