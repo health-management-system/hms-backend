@@ -92,104 +92,112 @@ api.get(routes.findPatient(), async (request) => {
     return { error: 400 };
   }
 
-  const pageSize = parseInt(request.queryString.pageSize) || 10;
-  const currentPage = parseInt(request.queryString.page) || 1;
+  const pageSize = parseInt(request.queryString.pageSize) || 10; //(optional, defaults to 10 if not provided)
+  const currentPage = parseInt(request.queryString.page) || 1; // (optional, defaults to 1 if not provided)
+  const lastEvaluatedKey = request.queryString.lastEvaluatedKey || null; // the last evaluated key of the previous page (optional, null if this is the first page)
 
   const offset = (currentPage - 1) * pageSize;
 
-  const [patientInfo, recordsCount, records] = await Promise.all([
-    // Get patient info by username
-    dynamoDB
-      .query({
-        TableName: databaseTable.getPatientsInfoTableName(),
-        KeyConditionExpression: "userid = :userid",
-        ExpressionAttributeValues: {
-          ":userid": username,
-        },
-      })
-      .promise()
-      .then((response) => response.Items[0]),
-    // Get the count of patient records by username
-    dynamoDB
-      .query({
-        TableName: databaseTable.getRecordTableName(),
-        IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
-        KeyConditionExpression: "patientUsername = :username",
-        ExpressionAttributeValues: {
-          ":username": username,
-        },
-        Select: "COUNT",
-      })
-      .promise()
-      .then((response) => response.Count),
-    // Get patient records by username with pagination
-    dynamoDB
-      .query({
-        TableName: databaseTable.getRecordTableName(),
-        IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
-        KeyConditionExpression: "patientUsername = :username",
-        ExpressionAttributeValues: {
-          ":username": username,
-        },
-        Limit: pageSize,
-        ScanIndexForward: false,
-        ExclusiveStartKey:
-          currentPage > 1 ? request.state.records.lastEvaluatedKey : undefined,
-      })
-      .promise()
-      .then((response) => response.Items),
-  ]);
-
-  // return { patientInfoOBJECT : patientInfo, recordObject : records, recordsCountObject: recordsCount }
-  // Extract the set of unique doctor usernames from the records
-  const uniqueDoctorUsernames = [...new Set(records.map((record) => record.doctorUsername))];
-
-  // Fetch the doctor information for each unique doctor username
-  const doctors = await Promise.all(
-    uniqueDoctorUsernames.map((doctorUsername) =>
+  try {
+    const [patientInfo, recordsCount, records] = await Promise.all([
+      // Get patient info by username
       dynamoDB
         .query({
-          TableName: databaseTable.getDoctorInfoTableName(),
-          KeyConditionExpression: "doctorid = :doctorid",
+          TableName: databaseTable.getPatientsInfoTableName(),
+          KeyConditionExpression: "userid = :userid",
           ExpressionAttributeValues: {
-            ":doctorid": doctorUsername,
+            ":userid": username,
           },
         })
         .promise()
-        .then((response) => response.Items[0])
-    )
-  );
+        .then((response) => response.Items[0]),
+      // Get the count of patient records by username
+      dynamoDB
+        .query({
+          TableName: databaseTable.getRecordTableName(),
+          IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
+          KeyConditionExpression: "patientUsername = :username",
+          ExpressionAttributeValues: {
+            ":username": username,
+          },
+          Select: "COUNT",
+        })
+        .promise()
+        .then((response) => response.Count),
+      // Get patient records by username with pagination
+      dynamoDB
+        .query({
+          TableName: databaseTable.getRecordTableName(),
+          IndexName: "patientUsernameIndex", // Use the secondary index on the patientUsername field
+          KeyConditionExpression: "patientUsername = :username",
+          ExpressionAttributeValues: {
+            ":username": username,
+          },
+          Limit: pageSize,
+          ScanIndexForward: false,
+          ExclusiveStartKey:
+            currentPage > 1 ? { patientUsername: username, recordid: lastEvaluatedKey } : undefined,
+        })
+        .promise()
+        .then((response) => response.Items),
+    ]);
 
-  // Map each record to a new object that includes the doctor information
-  const recordsWithDoctorInfo = records.map((record) => {
-    const doctor = doctors.find((d) => d.doctorid === record.doctorUsername);
+    // return { patientInfoOBJECT : patientInfo, recordObject : records, recordsCountObject: recordsCount }
+    // Extract the set of unique doctor usernames from the records
+    const uniqueDoctorUsernames = [...new Set(records.map((record) => record.doctorUsername))];
+
+    // Fetch the doctor information for each unique doctor username
+    const doctors = await Promise.all(
+      uniqueDoctorUsernames.map((doctorUsername) =>
+        dynamoDB
+          .query({
+            TableName: databaseTable.getDoctorInfoTableName(),
+            KeyConditionExpression: "doctorid = :doctorid",
+            ExpressionAttributeValues: {
+              ":doctorid": doctorUsername,
+            },
+          })
+          .promise()
+          .then((response) => response.Items[0])
+      )
+    );
+
+    let lastEKey;
+    // Map each record to a new object that includes the doctor information
+    const recordsWithDoctorInfo = records.map((record) => {
+      const doctor = doctors.find((d) => d.doctorid === record.doctorUsername);
+      lastEKey = record.recordid;
+      return {
+        dateTime: record.dateTime,
+        doctorName: `${doctor.firstname} ${doctor.lastname}`,
+        clinic: doctor.clinic,
+        subject: record.subject,
+      };
+    });
+
     return {
-      dateTime: record.dateTime,
-      doctorName: `${doctor.firstname} ${doctor.lastname}`,
-      clinic: doctor.clinic,
-      subject: record.subject,
+      patientInfo: {
+        username: patientInfo.userid,
+        firstname: patientInfo.firstname,
+        lastname: patientInfo.lastname,
+        dateofbirth: patientInfo.dateofbirth,
+        email: patientInfo.email,
+        phonenumber: patientInfo.phonenumber,
+        address: patientInfo.address,
+        postalcode: patientInfo.postalcode,
+        healthcardnumber: patientInfo.healthcardnumber,
+      },
+      records: {
+        total_items: recordsCount,
+        items_per_page: pageSize,
+        current_page: currentPage,
+        lastEvaluatedKey: lastEKey,
+        records: recordsWithDoctorInfo,
+      },
     };
-  });
-
-  return {
-    patientInfo: {
-      username: patientInfo.userid,
-      firstname: patientInfo.firstname,
-      lastname: patientInfo.lastname,
-      dateofbirth: patientInfo.dateofbirth,
-      email: patientInfo.email,
-      phonenumber: patientInfo.phonenumber,
-      address: patientInfo.address,
-      postalcode: patientInfo.postalcode,
-      healthcardnumber: patientInfo.healthcardnumber,
-    },
-    records: {
-      total_items: recordsCount,
-      items_per_page: pageSize,
-      current_page: currentPage,
-      records: recordsWithDoctorInfo,
-    },
-  };
+  } catch (error) {
+    return { error: `Something went wrong. ${error.message}`, errorCode: error.errorCode };
+  }
 });
 
 
@@ -219,25 +227,25 @@ api.get(routes.findDoctor(), (request) => {
 
 /**
  * {
-	"patientInfo": {
-		"username": "john smith",
-		"firstName": "John",
-		"lastName": "Smith",
-		"dateOfBirth": "08-24-1990",
-		"email": "sam@smith.com",
-		"phoneNumber": "5182737523",
-		"address": "123 Main St",
-		"postalCode": "A2A 2A2",
-		"healthCardNumber": "123124124142"
-	},
-	"records": {
-		"records": [{
-			"dateTime": "12the February, 2023 08:00 am",
-			"doctorName": " Mr.Michale Simon",
-			"clinic": "Happy Clinic",
-			"subject": " Severe Migraine"
-		}]
-	},
+  "patientInfo": {
+    "username": "john smith",
+    "firstName": "John",
+    "lastName": "Smith",
+    "dateOfBirth": "08-24-1990",
+    "email": "sam@smith.com",
+    "phoneNumber": "5182737523",
+    "address": "123 Main St",
+    "postalCode": "A2A 2A2",
+    "healthCardNumber": "123124124142"
+  },
+  "records": {
+    "records": [{
+      "dateTime": "12the February, 2023 08:00 am",
+      "doctorName": " Mr.Michale Simon",
+      "clinic": "Happy Clinic",
+      "subject": " Severe Migraine"
+    }]
+  },
   "pagination": {
         "total_items": 200,
         "items_per_page": 10,
