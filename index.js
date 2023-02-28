@@ -94,7 +94,8 @@ api.get(routes.findPatient(), async (request) => {
 
   const pageSize = parseInt(request.queryString.pageSize) || 10; //(optional, defaults to 10 if not provided)
   const currentPage = parseInt(request.queryString.page) || 1; // (optional, defaults to 1 if not provided)
-  const lastEvaluatedKey = request.queryString.lastEvaluatedKey || null; // the last evaluated key of the previous page (optional, null if this is the first page)
+  const lastEvaluatedKey = request.queryString.lastEvaluatedKey || null; /* the last evaluated key of the previous page ((recordid that is provided as part of the response of the first page and subsequent ones))
+   (optional, null if this is the first page) */
 
   const offset = (currentPage - 1) * pageSize;
 
