@@ -8,7 +8,7 @@ const Routing = require("./routing/routing");
 const databaseTable = new Routing.DynamoDBTables();
 const routes = new Routing.ServerEndpoints();
 
-// SAVE PATIENT -> endpoint  => /registerpatientinfo  
+// SAVE PATIENT -> endpoint  => /registerpatientinfo
 api.post(
   routes.registerPatientInfo(),
   (request) => {
@@ -46,7 +46,7 @@ api.post(
         clinic: request.body.clinic,
         specialization: request.body.specialization,
         email: request.body.email,
-        phonenumber: request.body.phonenumber
+        phonenumber: request.body.phonenumber,
       },
     };
     return dynamoDB.put(params).promise();
@@ -54,7 +54,7 @@ api.post(
   { success: 201 }
 );
 
-// Register Record - /registerrecord 
+// Register Record - /registerrecord
 api.post(
   routes.registerRecord(),
   (request) => {
@@ -75,7 +75,7 @@ api.post(
   { success: 201 }
 );
 
-// Return list of all the patients 
+// Return list of all the patients
 api.get(routes.getPatientsInfo(), (request) => {
   // GET all users
   return dynamoDB
@@ -94,7 +94,9 @@ api.get(routes.findPatient(), async (request) => {
 
   const pageSize = parseInt(request.queryString.pageSize) || 10; //(optional, defaults to 10 if not provided)
   const currentPage = parseInt(request.queryString.page) || 1; // (optional, defaults to 1 if not provided)
-  const lastEvaluatedKey = request.queryString.lastEvaluatedKey || null; /* the last evaluated key of the previous page ((recordid that is provided as part of the response of the first page and subsequent ones))
+  const lastEvaluatedKey =
+    request.queryString.lastEvaluatedKey ||
+    null; /* the last evaluated key of the previous page ((recordid that is provided as part of the response of the first page and subsequent ones))
    (optional, null if this is the first page) */
 
   const offset = (currentPage - 1) * pageSize;
@@ -137,7 +139,9 @@ api.get(routes.findPatient(), async (request) => {
           Limit: pageSize,
           ScanIndexForward: false,
           ExclusiveStartKey:
-            currentPage > 1 ? { patientUsername: username, recordid: lastEvaluatedKey } : undefined,
+            currentPage > 1
+              ? { patientUsername: username, recordid: lastEvaluatedKey }
+              : undefined,
         })
         .promise()
         .then((response) => response.Items),
@@ -145,7 +149,9 @@ api.get(routes.findPatient(), async (request) => {
 
     // return { patientInfoOBJECT : patientInfo, recordObject : records, recordsCountObject: recordsCount }
     // Extract the set of unique doctor usernames from the records
-    const uniqueDoctorUsernames = [...new Set(records.map((record) => record.doctorUsername))];
+    const uniqueDoctorUsernames = [
+      ...new Set(records.map((record) => record.doctorUsername)),
+    ];
 
     // Fetch the doctor information for each unique doctor username
     const doctors = await Promise.all(
@@ -169,10 +175,11 @@ api.get(routes.findPatient(), async (request) => {
       const doctor = doctors.find((d) => d.doctorid === record.doctorUsername);
       lastEKey = record.recordid;
       return {
-        dateTime: record.dateTime,
+        dateTime: record.date,
         doctorName: `${doctor.firstname} ${doctor.lastname}`,
         clinic: doctor.clinic,
         subject: record.subject,
+        recordid: record.recordid,
       };
     });
 
@@ -197,17 +204,19 @@ api.get(routes.findPatient(), async (request) => {
       },
     };
   } catch (error) {
-    return { error: `Something went wrong. ${error.message}`, errorCode: error.errorCode };
+    return {
+      error: `Something went wrong. ${error.message}`,
+      errorCode: error.errorCode,
+    };
   }
 });
-
 
 // Return a doctor information by username
 api.get(routes.findDoctor(), (request) => {
   // GET a user by username
   const username = request.queryString && request.queryString.username;
 
-  // Error Handling : If the username is emptry it will return with a 400 
+  // Error Handling : If the username is emptry it will return with a 400
   if (!username) {
     return { error: 400 };
   }
@@ -255,9 +264,7 @@ api.get(routes.findDoctor(), (request) => {
 }
  */
 
-
-
-/// DELETE THIS LATER 
+/// DELETE THIS LATER
 // api.get("/patientI", (request) => { // GET all data
 //   const getUsers = dynamoDB.scan({ TableName: databaseTable.getPatientsInfoTableName() }).promise();
 //   const getOrders = dynamoDB.query({
