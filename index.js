@@ -75,6 +75,25 @@ api.post(
   { success: 201 }
 );
 
+// Return list of all the patients 
+api.get(routes.findaRecord(), (request) => { 
+  
+  const id = request.queryString && request.queryString.recordid;
+
+  // GET a record by recordid
+  return  dynamoDB
+  .query({
+    TableName: databaseTable.getRecordTableName(),
+    KeyConditionExpression: "recordid = :recordid",
+    ExpressionAttributeValues: {
+      ":recordid": id,
+    },
+  })
+  .promise()
+  .then((response) => response.Items[0])
+});
+
+
 // Return list of all the patients
 api.get(routes.getPatientsInfo(), (request) => {
   // GET all users

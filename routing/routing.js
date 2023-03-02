@@ -8,6 +8,9 @@ const bulkRegisterPatients = '/bulkcreateusers'
 // Doctor Info Registration 
 const registerdoctorinfo = '/registerdoctorinfo'
 
+//Find a Record
+const findarecord = '/findarecord'
+
 // Record Registeration
 const registerRecord = "/registerrecord"
 
@@ -36,6 +39,10 @@ class ServerEndpoints {
     findDoctor() { return findDoctor; }
     // Create Multiple Users at once
     addMultiplePatientsToDatabase() { return bulkRegisterPatients;}
+
+    // Find a record
+
+    findaRecord() {return findarecord; }
 
     // Register doctor info
     registerDoctorInfo() { return registerdoctorinfo;}
