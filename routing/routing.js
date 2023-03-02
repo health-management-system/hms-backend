@@ -1,67 +1,113 @@
 // Server endpoint , Creating a patient, doctor, creaeting multiple patients
-const registerPatientInfo = '/registerpatientinfo'
-const getPatientsInfo = '/fetchpatientsinfo'
-const findPatient = '/findpatient'
-const findDoctor = '/finddoctor'
-const bulkRegisterPatients = '/bulkcreateusers'
+const registerPatientInfo = "/registerpatientinfo";
+const getPatientsInfo = "/fetchpatientsinfo";
+const findPatient = "/findpatient";
+const findDoctor = "/finddoctor";
+const bulkRegisterPatients = "/bulkcreateusers";
 
-// Doctor Info Registration 
-const registerdoctorinfo = '/registerdoctorinfo'
+// Doctor Info Registration
+const registerdoctorinfo = "/registerdoctorinfo";
 
 //Find a Record
-const findarecord = '/findarecord'
+const findarecord = "/findarecord";
+
+//Find a User
+const finduser = "/finduser";
 
 // Record Registeration
-const registerRecord = "/registerrecord"
+const registerRecord = "/registerrecord";
 
 // DynamoDB table names
-const dynamoDBPatientInfoTable = "users"
-const dynamoDBDoctorInfoTable = "doctor-info"
-const dynamoDBRecord = "record"
+const dynamoDBPatientInfoTable = "users";
+const dynamoDBDoctorInfoTable = "doctor-info";
+const dynamoDBRecord = "record";
+const dynamoDBUserInfoTable = "user-info";
 
-// TEST 
+// TEST
 
-const findPatientPagination = '/findpatientPagination'
+const findPatientPagination = "/findpatientPagination";
 
 //
 
 class ServerEndpoints {
+  // Create a user
+  registerPatientInfo() {
+    return registerPatientInfo;
+  }
+  // Get all the users
+  getPatientsInfo() {
+    return getPatientsInfo;
+  }
+  // Find a specific Patient
+  findPatient() {
+    return findPatient;
+  }
+  // Find a speciic Patient with Pagination
+  findPatientPagination() {
+    return findPatientPagination;
+  }
+  // Find a specific Doctor
+  findDoctor() {
+    return findDoctor;
+  }
+  // Create Multiple Users at once
+  addMultiplePatientsToDatabase() {
+    return bulkRegisterPatients;
+  }
 
-    // Create a user
-    registerPatientInfo() { return registerPatientInfo;}
-    // Get all the users
-    getPatientsInfo() { return getPatientsInfo;}
-    // Find a specific Patient
-    findPatient() { return findPatient;}
-    // Find a speciic Patient with Pagination 
-    findPatientPagination() { return findPatientPagination; }
-    // Find a specific Doctor
-    findDoctor() { return findDoctor; }
-    // Create Multiple Users at once
-    addMultiplePatientsToDatabase() { return bulkRegisterPatients;}
+  // Find a record
 
-    // Find a record
+  findaRecord() {
+    return findarecord;
+  }
 
-    findaRecord() {return findarecord; }
+  // Find a user
 
-    // Register doctor info
-    registerDoctorInfo() { return registerdoctorinfo;}
+  findUser() {
+    return finduser;
+  }
 
-    // Register a record
-    registerRecord() { return registerRecord; }
+  // Register doctor info
+  registerDoctorInfo() {
+    return registerdoctorinfo;
+  }
 
-    // User management endpoints
-    signupUser() { return signupUser;}
-    loginUser() { return loginUser;}
-    userProfile(){ return userProfile;}
-    forgotPassword() { return forgotPassword;}
+  // Register a record
+  registerRecord() {
+    return registerRecord;
+  }
 
+  // User management endpoints
+  signupUser() {
+    return signupUser;
+  }
+  loginUser() {
+    return loginUser;
+  }
+  userProfile() {
+    return userProfile;
+  }
+  forgotPassword() {
+    return forgotPassword;
+  }
 }
 
 class DynamoDBTables {
-    getPatientsInfoTableName() { return dynamoDBPatientInfoTable;}
-    getDoctorInfoTableName() { return dynamoDBDoctorInfoTable; }
-    getRecordTableName() { return dynamoDBRecord;}
+  getPatientsInfoTableName() {
+    return dynamoDBPatientInfoTable;
+  }
+  getDoctorInfoTableName() {
+    return dynamoDBDoctorInfoTable;
+  }
+  getRecordTableName() {
+    return dynamoDBRecord;
+  }
+  getUserInfoTableName() {
+    return dynamoDBUserInfoTable;
+  }
 }
 
-module.exports = { ServerEndpoints: ServerEndpoints, DynamoDBTables: DynamoDBTables};
+module.exports = {
+  ServerEndpoints: ServerEndpoints,
+  DynamoDBTables: DynamoDBTables,
+};
