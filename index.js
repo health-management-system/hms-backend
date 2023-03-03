@@ -2,9 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 const { URLSearchParams } = require("url");
 const ApiBuilder = require("claudia-api-builder"),
   AWS = require("aws-sdk");
-/* var api = new ApiBuilder(),
-  dynamoDB = new AWS.DynamoDB.DocumentClient(); */
-var api1 = new ApiBuilder(),
+ var api = new ApiBuilder(),
   dynamoDB = new AWS.DynamoDB.DocumentClient();
 const Routing = require("./routing/routing");
 const databaseTable = new Routing.DynamoDBTables();
@@ -351,7 +349,7 @@ api.get(routes.findDoctor(), (request) => {
 // }, { success: 201 });// returns HTTP status 201 - Created if successful
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-api1.post(
+api.post(
   routes.registerPatientInfo(),
   (request) => {
     // This will be replaced by Cognito USERNAME
@@ -375,7 +373,7 @@ api1.post(
 ); // returns HTTP status 201 - Created if successful
 
 // Register doctor info - /registerdoctorinfo DOCTOR
-api1.post(
+api.post(
   routes.registerDoctorInfo(),
   (request) => {
     var params = {
@@ -400,7 +398,7 @@ api1.post(
 );
 
 // Register Record - /registerrecord
-api1.post(
+api.post(
   routes.registerRecord(),
   (request) => {
     var userId = uuidv4();
@@ -421,7 +419,7 @@ api1.post(
 );
 
 // Return list of all the patients
-api1.get(routes.findaRecord(), (request) => {
+api.get(routes.findaRecord(), (request) => {
   const id = request.queryString && request.queryString.recordid;
 
   // GET a record by recordid
@@ -437,7 +435,7 @@ api1.get(routes.findaRecord(), (request) => {
     .then((response) => response.Items[0]);
 });
 
-api1.get(routes.findUser(), (request) => {
+api.get(routes.findUser(), (request) => {
   // GET a user by username
   const username = request.queryString && request.queryString.username;
 
@@ -460,7 +458,7 @@ api1.get(routes.findUser(), (request) => {
 });
 
 // Return list of all the patients
-api1.get(routes.getPatientsInfo(), (request) => {
+api.get(routes.getPatientsInfo(), (request) => {
   // GET all users
   return dynamoDB
     .scan({ TableName: databaseTable.getUserInfoTableName() })
@@ -469,7 +467,7 @@ api1.get(routes.getPatientsInfo(), (request) => {
 });
 
 // Return a patient information by username - Pagination
-api1.get(routes.findPatient(), async (request) => {
+api.get(routes.findPatient(), async (request) => {
   const username = request.queryString && request.queryString.username;
 
   if (!username) {
@@ -542,9 +540,9 @@ api1.get(routes.findPatient(), async (request) => {
         dynamoDB
           .query({
             TableName: databaseTable.getUserInfoTableName(),
-            KeyConditionExpression: "doctorid = :doctorid",
+            KeyConditionExpression: "userid = :userid",
             ExpressionAttributeValues: {
-              ":doctorid": doctorUsername,
+              ":userid": doctorUsername,
             },
           })
           .promise()
@@ -596,11 +594,12 @@ api1.get(routes.findPatient(), async (request) => {
 });
 
 // Return a doctor information by username
-api1.get(routes.findDoctor(), (request) => {
-  // GET a user by username
+api.get(routes.findDoctor(), (request) => {
+  // GET a user by username and roleid
   const username = request.queryString && request.queryString.username;
+  const roleid = "doctor";
 
-  // Error Handling : If the username is emptry it will return with a 400
+  // Error Handling : If the username is empty it will return with a 400
   if (!username) {
     return { error: 400 };
   }
@@ -608,15 +607,21 @@ api1.get(routes.findDoctor(), (request) => {
   return dynamoDB
     .query({
       TableName: databaseTable.getUserInfoTableName(),
-      KeyConditionExpression: "doctorid = :doctorid",
+      KeyConditionExpression: "userid = :userid",
+      FilterExpression: "roleid = :roleid",
       ExpressionAttributeValues: {
-        ":doctorid": username,
+        ":userid": username,
+        ":roleid": roleid,
       },
     })
     .promise()
-    .then((response) => response.Items[0])
+    .then((response) => {
+      const items = response.Items;
+      const doctor = items.find((item) => item.userid === username);
+      return doctor || { error: "Doctor not found" };
+    })
     .catch((error) => ({ error: error.message }));
 });
 
-module.exports = api1;
-//module.exports = api;
+
+module.exports = api;
