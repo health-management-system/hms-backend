@@ -76,21 +76,56 @@ api.post(
 );
 
 // Return list of all the patients 
-api.get(routes.findaRecord(), (request) => { 
-  
+api.get(routes.findaRecord(), async (request) => {
+
   const id = request.queryString && request.queryString.recordid;
 
   // GET a record by recordid
-  return  dynamoDB
-  .query({
-    TableName: databaseTable.getRecordTableName(),
-    KeyConditionExpression: "recordid = :recordid",
-    ExpressionAttributeValues: {
-      ":recordid": id,
-    },
-  })
-  .promise()
-  .then((response) => response.Items[0])
+  try {
+
+    const recordPromise = dynamoDB
+      .query({
+        TableName: databaseTable.getRecordTableName(),
+        KeyConditionExpression: "recordid = :recordid",
+        ExpressionAttributeValues: {
+          ":recordid": id,
+        },
+      })
+      .promise()
+      .then((response) => response.Items[0]);
+
+    const record = await recordPromise;
+
+    // Get a doctor by id
+    const doctorPromise = dynamoDB
+      .query({
+        TableName: databaseTable.getDoctorInfoTableName(),
+        KeyConditionExpression: "doctorid = :doctorid",
+        ExpressionAttributeValues: {
+          ":doctorid": record.doctorUsername,
+        },
+      })
+      .promise()
+      .then((response) => response.Items[0])
+      .catch((error) => ({ error: error.message }));
+
+    const doctor = await doctorPromise;
+    return {
+      dateTime: record.date,
+      doctorUsername: record.doctorUsername,
+      doctorName: `${doctor.firstname} ${doctor.lastname}`,
+      log: record.log,
+      patientUsername: record.patientUsername,
+      clinic: doctor.clinic,
+      subject: record.subject,
+      recordid: record.recordid
+    };
+  } catch (error) {
+    return {
+      error: `Something went wrong. ${error.message}`,
+      errorCode: error.errorCode,
+    };
+  }
 });
 
 
