@@ -22,6 +22,7 @@ api.post(
         phonenumber: request.body.phonenumber,
         healthcardnumber: request.body.healthcardnumber,
         address: request.body.address,
+        postalcode: request.body.postalcode,
         email: request.body.email,
         dateofbirth: request.body.dateofbirth,
       },
