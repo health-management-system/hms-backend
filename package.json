@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+
+    "test": "mocha"
+    
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "amazon-cognito-identity-js": "^6.1.2",
-    "aws-sdk": "^2.1308.0",
+    "aws-sdk": "^2.1329.0",
     "claudia-api-builder": "^4.1.2",
     "har-validator": "^5.1.5",
     "isomorphic-fetch": "^3.0.0",
@@ -22,5 +24,11 @@
     "querystring": "^0.2.1",
     "request": "^2.88.2",
     "uuid": "^7.0.3"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.1"
   }
+ 
 }
