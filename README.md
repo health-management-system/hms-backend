@@ -1,7 +1,16 @@
 # HMS Backend
 ## Testing
 ### Steps:
-- First make sure that you have an aws config file (if you have already done so skip this step). This file should not be pushed to the repo and shoudl remain on your local machine. This can be done by creating `./config.json` in the root directory. It should look something like this:
+**1.** First we need to install several npm packages globally by running both:
+```bash
+npm intall --global nyc
+```
+and
+```bash
+npm install --global claudia-local-api
+```
+
+**2.** Next make sure that you have an aws config file (if you have already done so skip this step). This file should not be pushed to the repo and shoudl remain on your local machine. This can be done by creating `./config.json` in the root directory. It should look something like this:
 ```json
 { 
     "accessKeyId": <AWS_Access_Key>,
@@ -9,7 +18,8 @@
     "region": "us-east-1" 
 }
 ```
-- Next we need to uncomment line 7 from `./index.js` to load our newly created local config (see below). This line should always be commented when actually deploying the backend.
+
+**3.** Next we need to uncomment line 7 from `./index.js` to load our newly created local config (see below). This line should always be commented when actually deploying the backend.
 ```javascript
 1   const { v4: uuidv4 } = require("uuid");
 2   const { URLSearchParams } = require("url");
@@ -24,6 +34,9 @@
 11  const databaseTable = new Routing.DynamoDBTables();
 12  const routes = new Routing.ServerEndpoints();
 ``` 
-- Run the server locally using `npm run coverage`. This will instrument the code and start the server locally on [http://localhost:3000](http://localhost:3000).
-- Next the mocha tests can be run using `npm test`.
-- After these tests are run we can see the coverage report in the `./coverage` directory
+
+**4.** Run the server locally using `npm run coverage`. This will instrument the code and start the server locally on [http://localhost:3000](http://localhost:3000).
+
+**5.** Next the mocha tests can be run using `npm test`.
+
+**6.** After these tests are run we can see the coverage report in the `./coverage` directory
