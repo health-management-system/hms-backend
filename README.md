@@ -1,4 +1,5 @@
 # HMS Backend
+![Tests Passing](https://github.com/health-management-system/hms-backend/actions/workflows/main.yml/badge.svg?branch=master)
 ## Testing
 1. **Blackbox Tests:** Runs tests that will test the AWS API gateway (where `master` branch is deployed) 
 2. **Whitebox Tests:** Runs tests that will test the API locally (requires the API to be running locally using `npm run coverage`)
