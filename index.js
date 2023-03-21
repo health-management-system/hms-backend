@@ -1,9 +1,12 @@
 const { v4: uuidv4 } = require("uuid");
 const { URLSearchParams } = require("url");
 const ApiBuilder = require("claudia-api-builder"),
-  AWS = require("aws-sdk");
+AWS = require("aws-sdk");
+// This will fail if the config doesn't exist need to discuss this
+// Uncomment the line below when testing locally
+//AWS.config.loadFromPath('./config.json'); 
 var api = new ApiBuilder(),
-  dynamoDB = new AWS.DynamoDB.DocumentClient();
+dynamoDB = new AWS.DynamoDB.DocumentClient();
 const Routing = require("./routing/routing");
 const databaseTable = new Routing.DynamoDBTables();
 const routes = new Routing.ServerEndpoints();
