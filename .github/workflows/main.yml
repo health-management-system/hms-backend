@@ -1,0 +1,27 @@
+# Workflow to run the blackbox tests on the Deployed API
+name: Deployment Tests
+# Trigger on Pull Request to Master, Pushes to Master, and Workflow Dispatches
+on:
+  pull_request:
+    branches:
+      - 'master'
+  push:
+    branches:
+      - 'master'
+  workflow_dispatch:
+  
+jobs:
+  Run-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repo
+      - name: Checkout
+        uses: actions/checkout@v3.3.0
+      # Install the node dependencies
+      - name: Install Dependencies
+        run: |
+          npm install
+      # Run the blackbox tests
+      - name: Run Tests
+        run: |
+          npm run test-blackbox
