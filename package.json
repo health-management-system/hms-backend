@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test/**/*.js --timeout 10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary claudia-local-api --api-module index.js"
+    "coverage": "nyc --reporter=lcov --reporter=text-summary claudia-local-api --api-module index.js",
+    "test-blackbox": "mocha test/blackbox/*.js --timeout 10000",
+    "test-whitebox": "mocha test/whitebox/*.js --timeout 10000"
   },
   "keywords": [],
   "author": "",

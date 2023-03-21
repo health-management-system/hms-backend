@@ -1,9 +1,16 @@
 # HMS Backend
 ## Testing
-### Steps:
+1. **Blackbox Tests:** Runs tests that will test the AWS API gateway (where `master` branch is deployed) 
+2. **Whitebox Tests:** Runs tests that will test the API locally (requires the API to be running locally using `npm run coverage`)
+### Blackbox Tests Steps:
+- Run the blackbox tests using the following command in the terminal:
+```bash
+npm run test-blackbox
+```
+### Whitebox Tests with Coverage Steps:
 **1.** First we need to install several npm packages globally by running both:
 ```bash
-npm intall --global nyc
+npm install --global nyc
 ```
 and
 ```bash
@@ -37,6 +44,6 @@ npm install --global claudia-local-api
 
 **4.** Run the server locally using `npm run coverage`. This will instrument the code and start the server locally on [http://localhost:3000](http://localhost:3000).
 
-**5.** Next the mocha tests can be run using `npm test`.
+**5.** Next the mocha tests can be run using `npm test-whitebox`.
 
 **6.** After these tests are run we can see the coverage report in the `./coverage` directory

@@ -3,7 +3,7 @@ const assert = require('assert');
 
 const baseURL = 'http://localhost:3000'
 
-describe('Tests: \'/finddoctor\'', () => {
+describe('Tests: \'/findpatient\'', () => {
     it('Find existing patient', async() => {
         // Declare query string params
         const params = new URLSearchParams([['username', 'axios_patient_read']])
