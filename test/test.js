@@ -1,9 +1,9 @@
 const axios = require('axios')
 const assert = require('assert');
 
-const baseURL = 'https://j4mbz2k3ad.execute-api.us-east-1.amazonaws.com/latest'
+const baseURL = 'http://localhost:3000'
 
-describe('Blackbox Tests: \'/findpatient\'', () => {
+describe('Tests: \'/finddoctor\'', () => {
     it('Find existing patient', async() => {
         // Declare query string params
         const params = new URLSearchParams([['username', 'axios_patient_read']])
@@ -56,11 +56,11 @@ describe('Blackbox Tests: \'/findpatient\'', () => {
         const error = response.data.error
 
         // Assert response is correct
-        assert(error == 'Something went wrong. Cannot read property \'userid\' of undefined')
+        assert(error == 'Something went wrong. Cannot read properties of undefined (reading \'userid\')')
     })
 })
 
-describe('Blackbox Tests: \'/finddoctor\'', () => {
+describe('Tests: \'/finddoctor\'', () => {
     it('Find existing doctor', async() => {
         // Declare query string params
         const params = new URLSearchParams([['username', 'axios_doctor_read']])
@@ -112,7 +112,7 @@ describe('Blackbox Tests: \'/finddoctor\'', () => {
     })
 })
 
-describe('Blackbox Tests: \'/findarecord\'', async() => {
+describe('Tests: \'/findarecord\'', async() => {
     it('Find existing record', async() => {
         // Declare query string params
         const params = new URLSearchParams([['recordid', '559d912c-b153-4a94-ac5d-9d8215ea9e29']])
@@ -163,11 +163,11 @@ describe('Blackbox Tests: \'/findarecord\'', async() => {
         const error = response.data.error
 
         // Assert response is correct
-        assert(error == 'Something went wrong. Cannot read property \'doctorUsername\' of undefined')
+        assert(error == 'Something went wrong. Cannot read properties of undefined (reading \'doctorUsername\')')
     })
 })
 
-describe('Blackbox Tests: \'/registerpatientinfo\'', async() => {
+describe('Tests: \'/registerpatientinfo\'', async() => {
     it('Update the info of an existing patient', async() => {
         // Declare the body of the request
         const body = {
@@ -190,7 +190,7 @@ describe('Blackbox Tests: \'/registerpatientinfo\'', async() => {
     })
 })
 
-describe('Blackbox Tests: \'/registerdoctor\'', async() => {
+describe('Tests: \'/registerdoctor\'', async() => {
     it('Update the info of an existing doctor', async() => {
         // Declare the body of the request
         const body = {
@@ -212,7 +212,7 @@ describe('Blackbox Tests: \'/registerdoctor\'', async() => {
     })
 })
 
-describe('Blackbox Tests: \'/registerrecord\'', async() => {
+describe('Tests: \'/registerrecord\'', async() => {
     it('Can successfully post a valid record', async() => {
         // Declare the body of the request
         const body = {

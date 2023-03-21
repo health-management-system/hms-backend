@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/**/*.js --timeout 10000"
+    "test": "mocha test/**/*.js --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary claudia-local-api --api-module index.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,10 @@
   },
   "devDependencies": {
     "axios": "^1.3.4",
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0"
+  },
+  "nyc": {
+    "all": true
   }
 }
